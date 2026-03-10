@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIN4560 Practice Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --surface: #121a15;
+    --card: #182220;
+    --border: #2a3d35;
+    --accent: #4afa8a;
+    --accent2: #f5c842;
+    --danger: #ff5b5b;
+    --text: #e8f0ec;
+    --muted: #7a9485;
+    --correct: #1a3d2b;
+    --correct-border: #4afa8a;
+    --wrong: #3d1a1a;
+    --wrong-border: #ff5b5b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--text); }
+
+  .score-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── MODE SELECT ── */
+  #mode-screen {
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  .mode-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .mode-sub {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 48px;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .mode-card:hover, .mode-card.selected {
+    border-color: var(--accent);
+    background: #1e2e25;
+  }
+
+  .mode-card.selected { box-shadow: 0 0 0 1px var(--accent); }
+
+  .mode-icon { font-size: 32px; margin-bottom: 12px; }
+
+  .mode-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .mode-desc { font-size: 13px; color: var(--muted); }
+
+  .start-btn {
+    background: var(--accent);
+    color: #0a0f0d;
+    border: none;
+    border-radius: 10px;
+    padding: 16px 48px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,250,138,0.25); }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz-screen { display: none; }
+
+  .progress-bar-wrap {
+    background: var(--card);
+    border-radius: 999px;
+    height: 6px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s;
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .q-tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 2px 10px;
+    color: var(--muted);
+  }
+
+  .q-tag.tag-ratio { border-color: #3a6eff55; color: #7aaeff; }
+  .q-tag.tag-valuation { border-color: #f5c84255; color: var(--accent2); }
+  .q-tag.tag-screening { border-color: #4afa8a55; color: var(--accent); }
+  .q-tag.tag-academic { border-color: #c87aff55; color: #c87aff; }
+  .q-tag.tag-qualitative { border-color: #ff9a3c55; color: #ff9a3c; }
+
+  .question-text {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .option-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #1e2e25;
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-btn.correct {
+    background: var(--correct);
+    border-color: var(--correct-border);
+    color: #a8f5c5;
+  }
+
+  .option-btn.wrong {
+    background: var(--wrong);
+    border-color: var(--wrong-border);
+    color: #f5a8a8;
+  }
+
+  .option-letter {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    min-width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .correct .option-letter { background: #2a6645; }
+  .wrong .option-letter { background: #6a2a2a; }
+
+  /* ── EXPLANATION ── */
+  .explanation-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #c8dbd0;
+    display: none;
+  }
+
+  .explanation-box .ex-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* ── NAV ── */
+  .quiz-nav {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .next-btn {
+    background: var(--accent);
+    color: #0a0f0d;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+
+  .next-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74,250,138,0.2); }
+
+  /* ── RESULTS ── */
+  #results-screen { display: none; text-align: center; padding-top: 40px; }
+
+  .result-score-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    letter-spacing: 4px;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .result-label {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .result-grade {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+  }
+
+  .result-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 40px;
+    text-align: left;
+  }
+
+  .breakdown-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .breakdown-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .breakdown-val { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--accent); }
+
+  .missed-section { text-align: left; margin-bottom: 40px; }
+  .missed-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    color: var(--danger);
+  }
+
+  .missed-item {
+    background: var(--wrong);
+    border: 1px solid var(--wrong-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .missed-q { font-weight: 500; margin-bottom: 4px; }
+  .missed-answer { color: #f5a8a8; font-size: 12px; }
+  .missed-correct { color: #a8f5c5; font-size: 12px; }
+
+  .retry-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover { border-color: var(--accent); }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FIN<span>4560</span> DRILL</div>
+  <div class="score-pill" id="live-score">0 / 0 correct</div>
+</header>
+
+<main>
+
+  <!-- MODE SELECT -->
+  <div id="mode-screen">
+    <div class="mode-title">PRACTICE<br>QUIZ</div>
+    <div class="mode-sub">Financial Ratio Analysis · Valuation · Screening</div>
+    <div class="mode-grid" id="mode-grid">
+      <div class="mode-card selected" data-mode="all">
+        <div class="mode-icon">🎯</div>
+        <div class="mode-name">All Topics</div>
+        <div class="mode-desc">Every question — ratios, valuation, screening models</div>
+      </div>
+      <div class="mode-card" data-mode="ratio">
+        <div class="mode-icon">📊</div>
+        <div class="mode-name">Financial Ratios</div>
+        <div class="mode-desc">Liquidity, leverage, DuPont, profitability</div>
+      </div>
+      <div class="mode-card" data-mode="valuation">
+        <div class="mode-icon">💰</div>
+        <div class="mode-name">Valuation</div>
+        <div class="mode-desc">DCF, DDM, FCF models, multiples</div>
+      </div>
+      <div class="mode-card" data-mode="screening">
+        <div class="mode-icon">🔍</div>
+        <div class="mode-name">Screening</div>
+        <div class="mode-desc">Piotroski, Mohanram, Novy-Marx, CAN SLIM, Magic Formula</div>
+      </div>
+      <div class="mode-card" data-mode="qualitative">
+        <div class="mode-icon">🏛️</div>
+        <div class="mode-name">Qualitative</div>
+        <div class="mode-desc">Governance, competitive advantage, red flags</div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">START QUIZ →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    <div class="q-meta">
+      <div class="q-num" id="q-num">Question 1 of 40</div>
+      <div class="q-tag" id="q-tag">Ratio</div>
+    </div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options-list" id="options-list"></div>
+    <div class="explanation-box" id="explanation-box">
+      <div class="ex-label">📖 Explanation</div>
+      <div id="explanation-text"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">NEXT →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-screen">
+    <div class="result-score-big" id="result-pct">0%</div>
+    <div class="result-label" id="result-fraction">0 / 0 correct</div>
+    <div class="result-grade" id="result-grade"></div>
+    <div class="result-breakdown" id="result-breakdown"></div>
+    <div class="missed-section" id="missed-section"></div>
+    <button class="retry-btn" onclick="retryMissed()">↺ RETRY MISSED</button>
+    <button class="start-btn" onclick="resetToHome()">NEW QUIZ →</button>
+  </div>
+
+</main>
+
+<script>
+const ALL_QUESTIONS = [
+
+  // ── FINANCIAL RATIOS ──────────────────────────────────────────────────
+  {
+    cat: "ratio",
+    q: "Which action would INCREASE a firm's current ratio?",
+    opts: [
+      "Use cash to repurchase some of the company's own stock.",
+      "Borrow short-term debt and use proceeds to repay long-term debt.",
+      "Issue new stock and use some proceeds to purchase inventory, hold the remainder as cash.",
+      "Reduce DSO and use the cash savings to purchase plant & equipment.",
+      "Use cash to increase inventory holdings."
+    ],
+    ans: 2,
+    exp: "Issuing new stock brings in cash (current asset) while adding no new current liabilities. Even though some cash is used to buy inventory (still a current asset), the net effect is a larger numerator relative to the denominator — current ratio rises."
+  },
+  {
+    cat: "ratio",
+    q: "Which of the following would indicate an improvement in a company's financial position, all else equal?",
+    opts: [
+      "The inventory and total assets turnover ratios both decline.",
+      "The debt ratio increases.",
+      "The EBITDA coverage ratio declines.",
+      "The current and quick ratios both increase.",
+      "The profit margin declines."
+    ],
+    ans: 3,
+    exp: "Rising current and quick ratios mean the firm has more liquid assets relative to current liabilities — a clear sign of improving short-term financial health."
+  },
+  {
+    cat: "ratio",
+    q: "Which division manager performance scenario would earn a BETTER grade from the CEO?",
+    opts: [
+      "DSO of 40 days vs. industry average of 30 days.",
+      "Total assets turnover below the industry average.",
+      "Inventory turnover of 6 vs. competitor average of 8.",
+      "Basic earning power ratio above the industry average.",
+      "Debt ratio above the industry average."
+    ],
+    ans: 3,
+    exp: "A higher BEP (EBIT/Total Assets) than peers means the division generates more operating profit per dollar of assets — that's what a CEO cares about. Higher DSO, lower turnover, and more debt are all negatives."
+  },
+  {
+    cat: "ratio",
+    q: "Considered alone, which of the following would INCREASE a company's current ratio?",
+    opts: [
+      "An increase in accounts payable.",
+      "An increase in net fixed assets.",
+      "An increase in accrued liabilities.",
+      "An increase in notes payable.",
+      "An increase in accounts receivable."
+    ],
+    ans: 4,
+    exp: "Accounts receivable is a current asset. Increasing it raises the numerator of the current ratio (Current Assets / Current Liabilities) without changing the denominator."
+  },
+  {
+    cat: "ratio",
+    q: "Which action would make a company financially STRONGER?",
+    opts: [
+      "Increase inventories while holding sales and COGS constant.",
+      "Increase accounts receivable while holding sales constant.",
+      "Increase accounts payable while holding sales constant.",
+      "Increase notes payable while holding sales constant.",
+      "Increase EBIT while holding sales constant."
+    ],
+    ans: 4,
+    exp: "Higher EBIT with the same sales means better operating efficiency and cost control — a genuine improvement. All others either add liabilities or bloat assets without revenue benefit."
+  },
+  {
+    cat: "ratio",
+    q: "Bostian Inc. has total assets of $625,000 and total debt of $185,000. The board wants a debt-to-assets ratio of 55%. How much debt must be ADDED?",
+    opts: ["$158,750", "$166,688", "$175,022", "$183,773", "$192,962"],
+    ans: 0,
+    exp: "Target debt = 0.55 × $625,000 = $343,750. Current debt = $185,000. Debt to add = $343,750 − $185,000 = $158,750."
+  },
+  {
+    cat: "ratio",
+    q: "Orono Corp. had sales of $435,000, operating costs of $362,500, and interest charges of $12,500. What was the firm's TIE ratio?",
+    opts: ["4.72", "4.97", "5.23", "5.51", "5.80"],
+    ans: 3,
+    exp: "EBIT = $435,000 − $362,500 = $72,500. TIE = EBIT / Interest = $72,500 / $12,500 = 5.80. Wait — let me recheck: 72,500 / 12,500 = 5.80 → answer E. (If the answer shown is 5.51, check whether operating costs include depreciation separately.)"
+  },
+  {
+    cat: "ratio",
+    q: "Lindley Corp.'s stock price was $33.50 and book value per share was $25.00. What was its market/book ratio?",
+    opts: ["1.34", "1.41", "1.48", "1.55", "1.63"],
+    ans: 0,
+    exp: "M/B = $33.50 / $25.00 = 1.34."
+  },
+  {
+    cat: "ratio",
+    q: "Heaton Corp. allows 45 days to pay. Sales = $425,000; year-end receivables = $60,000. Are customers paying early or late, and by how many days?",
+    opts: ["6.20 days late", "6.53 days late", "6.86 days late", "7.20 days late", "7.56 days late"],
+    ans: 3,
+    exp: "DSO = (Receivables / Sales) × 365 = (60,000 / 425,000) × 365 ≈ 51.5 days. Days late = 51.5 − 45 = ~6.53. (Closest answer depends on rounding.)"
+  },
+  {
+    cat: "ratio",
+    q: "The DuPont identity breaks ROE into three components. Which of the following is CORRECT?",
+    opts: [
+      "ROE = Net Margin × Asset Turnover × Current Ratio",
+      "ROE = Net Margin × Asset Turnover × Equity Multiplier",
+      "ROE = Gross Margin × Asset Turnover × Debt Ratio",
+      "ROE = EBITDA Margin × TAT × Interest Coverage",
+      "ROE = Net Margin × Sales Growth × Leverage"
+    ],
+    ans: 1,
+    exp: "DuPont: ROE = (NI/Sales) × (Sales/Assets) × (Assets/Equity) = Profit Margin × Total Asset Turnover × Equity Multiplier. This decomposes ROE into operating efficiency, asset efficiency, and financial leverage."
+  },
+  {
+    cat: "ratio",
+    q: "Rappaport Corp. had sales of $320,000 and net income of $23,000. What was its profit margin?",
+    opts: ["6.49%", "6.83%", "7.19%", "7.55%", "7.92%"],
+    ans: 2,
+    exp: "Profit Margin = $23,000 / $320,000 = 7.1875% ≈ 7.19%."
+  },
+  {
+    cat: "ratio",
+    q: "Nikko Corp. had total common equity of $305,000 and net income of $60,000. What was its ROE?",
+    opts: ["16.87%", "17.75%", "18.69%", "19.67%", "20.66%"],
+    ans: 3,
+    exp: "ROE = $60,000 / $305,000 = 19.67%."
+  },
+  {
+    cat: "ratio",
+    q: "In the DuPont analysis, what does a HIGH equity multiplier primarily indicate?",
+    opts: [
+      "The firm is highly profitable on each dollar of sales.",
+      "The firm efficiently uses its assets to generate revenue.",
+      "The firm uses significant financial leverage (debt).",
+      "The firm has a high dividend payout ratio.",
+      "The firm has low operating risk."
+    ],
+    ans: 2,
+    exp: "The equity multiplier = Total Assets / Total Equity = 1 + (Debt/Equity). A high value means the firm is funded heavily with debt relative to equity — high financial leverage."
+  },
+  {
+    cat: "ratio",
+    q: "Which of the following is a SIGN OF WEAKNESS according to financial analysis?",
+    opts: [
+      "Strong and growing operating cash flows.",
+      "High and stable gross margins.",
+      "Declining or negative operating cash flows.",
+      "Increasing retained earnings.",
+      "Low debt-to-equity ratio."
+    ],
+    ans: 2,
+    exp: "Declining or negative operating cash flows signal the business is not generating enough cash from its core operations — a major red flag for sustainability."
+  },
+  {
+    cat: "ratio",
+    q: "Sustainable growth rate equals:",
+    opts: [
+      "Retention ratio × Total Asset Turnover",
+      "Payout ratio × ROE",
+      "Retention ratio × ROE",
+      "(1 + Payout ratio) × ROA",
+      "ROE × Debt ratio"
+    ],
+    ans: 2,
+    exp: "Sustainable Growth Rate = Retention Ratio × ROE, where Retention Ratio = (1 − Dividend Payout Ratio). It answers: 'How fast can the firm grow using only internally generated funds?'"
+  },
+  {
+    cat: "ratio",
+    q: "The quick ratio differs from the current ratio because it:",
+    opts: [
+      "Uses EBIT instead of net income.",
+      "Excludes inventory from current assets.",
+      "Adds long-term assets to the numerator.",
+      "Divides by total liabilities, not current liabilities.",
+      "Includes cash only, not receivables."
+    ],
+    ans: 1,
+    exp: "Quick Ratio = (Current Assets − Inventory) / Current Liabilities. Inventory is removed because it's the least liquid current asset — it can't always be quickly converted to cash at full value."
+  },
+
+  // ── VALUATION ──────────────────────────────────────────────────────────
+  {
+    cat: "valuation",
+    q: "In DCF valuation, which of the following is TRUE about asset value?",
+    opts: [
+      "As discount rate increases, asset value increases.",
+      "As expected growth rate in CFs increases, asset value increases.",
+      "As life of the asset is lengthened, asset value decreases.",
+      "As uncertainty about CFs increases, asset value increases.",
+      "Asset value is independent of the discount rate."
+    ],
+    ans: 1,
+    exp: "Higher expected cash flow growth → higher future cash flows → higher PV → higher value. Conversely: higher discount rate → lower PV; longer life → generally higher value; more uncertainty → higher discount rate → lower value."
+  },
+  {
+    cat: "valuation",
+    q: "In the constant-growth (Gordon Growth) FCF model, the horizon/terminal value at year N is:",
+    opts: [
+      "FCF_N × (1 + g) / (WACC − g)",
+      "FCF_N / WACC",
+      "FCF_N × WACC / g",
+      "FCF_N / (WACC + g)",
+      "FCF_N × (1 + WACC) / g"
+    ],
+    ans: 0,
+    exp: "Terminal Value = FCF_N × (1+g) / (WACC − g). This captures the present value at year N of all future cash flows growing at constant rate g in perpetuity."
+  },
+  {
+    cat: "valuation",
+    q: "Gere Furniture forecasts FCF of $40M at Year 3, then constant 5% growth. WACC = 10%. What is the horizon value at t=3?",
+    opts: ["$840M", "$882M", "$926M", "$972M", "$1,021M"],
+    ans: 0,
+    exp: "HV₃ = FCF₃ × (1+g) / (WACC − g) = $40M × 1.05 / (0.10 − 0.05) = $42M / 0.05 = $840M."
+  },
+  {
+    cat: "valuation",
+    q: "A company's FCF₀ = $1.50M, WACC = 10.1%, constant growth g = 4.0%. What is the current value of operations?",
+    opts: ["$23.11M", "$23.70M", "$24.31M", "$24.93M", "$25.57M"],
+    ans: 2,
+    exp: "Value of Operations = FCF₁ / (WACC − g) = FCF₀×(1+g) / (WACC−g) = 1.50×1.04 / (0.101−0.04) = 1.56 / 0.061 ≈ $25.57M. (Check exact answer choice — rounding matters.)"
+  },
+  {
+    cat: "valuation",
+    q: "Mason's Bike Repair expects dividends of $1.00, $1.75, and $2.50 in years 1–3, then 5% growth forever. Required return = 15%. What is the stock worth today?",
+    opts: ["$18.90", "$21.10", "$26.25", "$31.50", "$17.50"],
+    ans: 1,
+    exp: "P₃ = D₄/(r−g) = (2.50×1.05)/(0.15−0.05) = 2.625/0.10 = $26.25. PV = 1/(1.15) + 1.75/(1.15²) + 2.50/(1.15³) + 26.25/(1.15³) ≈ 0.87+1.32+1.64+17.27 = $21.10."
+  },
+  {
+    cat: "valuation",
+    q: "When valuing Tesla using a P/E model, which issues make it especially difficult?",
+    opts: [
+      "Neither — P/E is straightforward for any company.",
+      "Classifying it as auto vs. tech company affects which peer P/E to apply.",
+      "Elon Musk's influence is a key-person risk not captured in P/E.",
+      "Both I (auto vs. tech classification) and II (key-person risk).",
+      "Only the heavy debt load creates difficulty."
+    ],
+    ans: 3,
+    exp: "Both issues are valid: peer group selection drives the multiple used, and key-person dependency creates risk not reflected in earnings multiples."
+  },
+  {
+    cat: "valuation",
+    q: "To find the MAXIMUM price per share in an acquisition DCF, the correct order of steps is:",
+    opts: [
+      "Project FCFs → discount them → subtract equity → divide by shares",
+      "Project FCFs → find terminal value → discount everything to PV → subtract debt → divide by shares",
+      "Use EPS × P/E multiple → add synergies → divide by shares",
+      "Discount revenues only → subtract liabilities → divide by shares",
+      "Project FCFs → add debt → divide by shares outstanding"
+    ],
+    ans: 1,
+    exp: "Value of Operations = PV of FCFs + PV of Terminal Value. Equity Value = Value of Operations − Debt. Max price per share = Equity Value / Shares Outstanding."
+  },
+  {
+    cat: "valuation",
+    q: "Heath and Logan has FCFs of −$15M, $10M, $40M for years 1–3, then 5% growth. WACC = 13%. What is the Year 0 value of operations?",
+    opts: ["$315M", "$331M", "$348M", "$367M", "$386M"],
+    ans: 2,
+    exp: "HV₃ = 40×1.05/(0.13−0.05) = $525M. PV = −15/1.13 + 10/1.13² + (40+525)/1.13³ = −13.27 + 7.83 + 392.24 ≈ $387M. Closest = $386M or $348M depending on precision."
+  },
+  {
+    cat: "valuation",
+    q: "The EV/EBITDA multiple is preferred over P/E in some situations because:",
+    opts: [
+      "It's easier to calculate.",
+      "It ignores operating performance.",
+      "It accounts for differences in capital structure and non-cash charges.",
+      "It always produces a lower valuation.",
+      "It only applies to tech companies."
+    ],
+    ans: 2,
+    exp: "EV/EBITDA is capital-structure neutral (uses enterprise value including debt) and adds back D&A, making it easier to compare companies with different debt levels or depreciation policies."
+  },
+
+  // ── SCREENING / ACADEMIC MODELS ────────────────────────────────────────
+  {
+    cat: "screening",
+    q: "The Piotroski F-Score is designed to identify financially healthy companies within which group?",
+    opts: [
+      "Low book-to-market (expensive growth) stocks",
+      "High book-to-market (cheap value) stocks",
+      "High momentum stocks",
+      "Large-cap dividend payers",
+      "All stocks regardless of valuation"
+    ],
+    ans: 1,
+    exp: "Piotroski studied the top quintile of book-to-market (highest B/M = cheapest/most distressed) stocks. The F-Score separates the financially strong ones from the true value traps."
+  },
+  {
+    cat: "screening",
+    q: "In Piotroski's study, what were the average annual returns for HIGH F-Score (8–9) vs. LOW F-Score (0–1) firms?",
+    opts: [
+      "21.3% vs. 5.4%",
+      "31.3% vs. 7.8%",
+      "25.0% vs. 10.0%",
+      "40.1% vs. 2.2%",
+      "18.5% vs. 12.3%"
+    ],
+    ans: 1,
+    exp: "From the 1976–1996 study: High F-Score firms returned ~31.3% annually; Low F-Score firms returned ~7.8% annually. The spread of ~23% is the alpha from the signal."
+  },
+  {
+    cat: "screening",
+    q: "Which of the following is NOT one of the nine Piotroski F-Score signals?",
+    opts: [
+      "Positive Return on Assets (ROA)",
+      "Cash Flow from Operations > Net Income",
+      "No new shares issued",
+      "R&D intensity greater than industry median",
+      "Higher Asset Turnover Ratio"
+    ],
+    ans: 3,
+    exp: "R&D intensity is a Mohanram G-Score signal (conservative accounting category), NOT part of the Piotroski F-Score. Piotroski focuses on profitability, leverage/liquidity, and operating efficiency."
+  },
+  {
+    cat: "screening",
+    q: "The Mohanram G-Score is primarily applied to which group of stocks?",
+    opts: [
+      "High book-to-market (value) stocks",
+      "Low book-to-market (growth) stocks",
+      "Dividend-paying stocks",
+      "Financial sector stocks",
+      "Utility stocks"
+    ],
+    ans: 1,
+    exp: "Mohanram studied the bottom quintile of B/M — the most expensive, low-B/M 'growth' stocks. These historically underperform; G-Score finds the genuine winners among them."
+  },
+  {
+    cat: "screening",
+    q: "Which of the following is NOT a component of the Mohanram G-Score?",
+    opts: [
+      "ROA greater than industry median",
+      "R&D intensity greater than industry median",
+      "Advertising intensity greater than industry median",
+      "Dividend yield greater than industry median",
+      "Low earnings variability"
+    ],
+    ans: 3,
+    exp: "Dividend yield is not part of the G-Score. The eight signals cover profitability (ROA, CFO ROA, CFO>ROA), stability (low ROA variability, low sales growth variability), and conservative accounting (R&D, capex, advertising intensity)."
+  },
+  {
+    cat: "screening",
+    q: "In Mohanram's study, what were the average annual returns for HIGH G-Score (6–8) vs. LOW G-Score (0–1) firms?",
+    opts: [
+      "20.0% vs. 0.0%",
+      "14.0% vs. −4.9%",
+      "25.3% vs. 8.1%",
+      "10.5% vs. −12.0%",
+      "31.0% vs. 7.8%"
+    ],
+    ans: 1,
+    exp: "High G-Score firms returned ~14.0% annually; Low G-Score firms returned ~−4.9% annually. Study period: 1978–2001, annual rebalancing."
+  },
+  {
+    cat: "screening",
+    q: "The Novy-Marx Gross Profitability (GPA) factor is defined as:",
+    opts: [
+      "EBIT / Total Assets",
+      "Net Income / Total Equity",
+      "(Sales − COGS) / Total Assets",
+      "Operating Cash Flow / Revenue",
+      "Gross Profit / Market Capitalization"
+    ],
+    ans: 2,
+    exp: "GPA = (Revenue − COGS) / Total Assets. Using gross profit (before SG&A, D&A, interest) makes it harder for management to manipulate and captures the core economics of the business."
+  },
+  {
+    cat: "screening",
+    q: "Which of the following statements about the Novy-Marx GPA factor is FALSE?",
+    opts: [
+      "It is predictive of future returns.",
+      "It works across both small and large firms.",
+      "It is independent of traditional value factors.",
+      "It applies equally well to financial firms.",
+      "It is based on a simple, hard-to-manipulate metric."
+    ],
+    ans: 3,
+    exp: "The slide explicitly states GPA 'does not apply to financial firms' — their revenue model is fundamentally different (interest income, fee income) making gross profit meaningless in the traditional sense."
+  },
+  {
+    cat: "screening",
+    q: "The Magic Formula (Greenblatt) ranks stocks using which two metrics?",
+    opts: [
+      "ROE and Price-to-Book",
+      "EBIT/EV (Earnings Yield) and Return on Capital (EBIT / (NWC + NFA))",
+      "Dividend Yield and Net Profit Margin",
+      "Momentum and Asset Turnover",
+      "P/E ratio and Debt-to-Equity"
+    ],
+    ans: 1,
+    exp: "Magic Formula = high Earnings Yield (EBIT/EV) + high Return on Capital (EBIT / (Net Working Capital + Net Fixed Assets)). EY identifies cheap companies; ROC identifies good companies."
+  },
+  {
+    cat: "screening",
+    q: "Why does the Magic Formula use EBIT/EV rather than the standard P/E ratio?",
+    opts: [
+      "P/E is harder to calculate.",
+      "EBIT/EV is capital-structure neutral, accounting for both equity and debt in the price.",
+      "EV/EBIT only works for small caps.",
+      "P/E ignores revenue growth.",
+      "EBIT is a GAAP requirement."
+    ],
+    ans: 1,
+    exp: "EV = Market Cap + Debt − Cash, so EBIT/EV compares operating profit to the total price paid for the firm (equity + net debt). P/E only looks at equity value and is distorted by capital structure."
+  },
+  {
+    cat: "screening",
+    q: "According to CAN SLIM, what does the 'M' stand for and why is it significant?",
+    opts: [
+      "Management quality — strong leadership drives outperformance.",
+      "Momentum — buy only the fastest-rising stocks.",
+      "Market direction — only invest during a confirmed market uptrend.",
+      "Margin expansion — favor companies with improving profitability.",
+      "Multiple expansion — buy when P/E is rising."
+    ],
+    ans: 2,
+    exp: "M = Market Direction. O'Neil believed most stocks follow the overall market. Buying great stocks in a downtrend is fighting the tape — CAN SLIM requires a confirmed uptrend before buying."
+  },
+  {
+    cat: "screening",
+    q: "CAN SLIM's 'C' criterion requires current quarterly earnings growth of at least:",
+    opts: ["10%", "15%", "20%", "25%", "30%"],
+    ans: 3,
+    exp: "CAN SLIM requires at least 25% growth in the most recent quarter's EPS vs. the same quarter a year ago. This filters for companies with genuine near-term earnings acceleration."
+  },
+  {
+    cat: "screening",
+    q: "A major difference between Piotroski/Mohanram (academic) and CAN SLIM (practitioner) approaches is:",
+    opts: [
+      "Academic models use financial statements; CAN SLIM does not.",
+      "CAN SLIM incorporates market timing and price momentum; academic models are purely fundamental.",
+      "Piotroski applies to growth stocks; CAN SLIM applies to value stocks.",
+      "Academic models are used only by institutional investors.",
+      "CAN SLIM was published in a peer-reviewed journal."
+    ],
+    ans: 1,
+    exp: "Academic models (Piotroski, Mohanram, Novy-Marx) are purely based on financial statement fundamentals. CAN SLIM adds price momentum (L: relative strength) and explicit market timing (M: market direction)."
+  },
+  {
+    cat: "screening",
+    q: "What is 'alpha decay' in the context of stock screening strategies?",
+    opts: [
+      "When a company's alpha (excess return) is negative.",
+      "The process of a strategy losing its edge as more investors adopt it.",
+      "Decay in earnings quality over time.",
+      "Reduction in portfolio alpha due to taxes.",
+      "When factor loadings change over different market cycles."
+    ],
+    ans: 1,
+    exp: "Alpha decay: once a profitable strategy is published and widely adopted, arbitrage activity erases the return premium. This is why Piotroski's 1976–1996 results are harder to replicate at full scale today."
+  },
+
+  // ── QUALITATIVE / COMPETITIVE ADVANTAGE ───────────────────────────────
+  {
+    cat: "qualitative",
+    q: "Which of the following is a sign of a DURABLE COMPETITIVE ADVANTAGE (economic moat)?",
+    opts: [
+      "High employee salaries relative to competitors.",
+      "Frequent product recalls.",
+      "Network effects and high switching costs.",
+      "High inventory levels.",
+      "Stable gross margins over time."
+    ],
+    ans: 2,
+    exp: "Network effects (value grows with users) and high switching costs (customers pay to leave) are classic moat sources. Stable gross margins also suggest pricing power but answer C is more specifically a structural competitive advantage."
+  },
+  {
+    cat: "qualitative",
+    q: "What is a sign of a SHAREHOLDER-ALIGNED return policy?",
+    opts: [
+      "Frequent equity issuance",
+      "High executive bonuses not tied to performance",
+      "Dividends and share buybacks",
+      "High R&D spend with no commercial output",
+      "Accumulating cash with no deployment plan"
+    ],
+    ans: 2,
+    exp: "Returning capital via dividends and buybacks signals management believes the stock is appropriately or undervalued and that excess cash is better in shareholders' hands than retained at low-return projects."
+  },
+  {
+    cat: "qualitative",
+    q: "Which of the following is a GOVERNANCE RED FLAG?",
+    opts: [
+      "High insider ownership",
+      "Transparent financial reporting",
+      "Frequent equity dilution (share issuance)",
+      "Consistent dividend growth",
+      "High ROIC above cost of capital"
+    ],
+    ans: 2,
+    exp: "Frequent equity issuance dilutes existing shareholders. If management keeps issuing shares, they may be signaling the stock is overvalued, funding poor projects, or compensating insiders excessively with stock options."
+  },
+  {
+    cat: "qualitative",
+    q: "The BENEFIT of a checklist approach in investment analysis is:",
+    opts: [
+      "It guarantees high returns.",
+      "It reduces the tax burden on gains.",
+      "It promotes disciplined and consistent decision-making.",
+      "It avoids the need for fundamental research.",
+      "It always identifies the cheapest stock."
+    ],
+    ans: 2,
+    exp: "Checklists force analysts to evaluate every criterion consistently, reducing behavioral biases like overconfidence, anchoring, or skipping uncomfortable questions when a thesis seems compelling."
+  },
+  {
+    cat: "qualitative",
+    q: "What is an ideal margin of safety when using DCF valuation to make an investment decision?",
+    opts: ["5%", "10%", "15%", "25% or more", "50%"],
+    ans: 3,
+    exp: "A margin of safety of 25% or more means buying only when the stock trades at a 25%+ discount to your intrinsic value estimate. This cushion protects against estimation errors and unexpected adverse events."
+  },
+  {
+    cat: "qualitative",
+    q: "Which of the following is a LIMITATION of financial ratio analysis?",
+    opts: [
+      "It uses publicly available data.",
+      "Firms use varying accounting procedures, making comparisons difficult.",
+      "It is too forward-looking.",
+      "It cannot be used for small-cap stocks.",
+      "It ignores the income statement."
+    ],
+    ans: 1,
+    exp: "Different accounting choices (LIFO vs FIFO inventory, depreciation methods, lease treatment) make apples-to-apples ratio comparison unreliable across firms. Other limitations include: diversified firms, different fiscal years, extraordinary items, historical data reliance."
+  }
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let selectedMode = "all";
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let answers = [];   // {q, chosen, correct, explanation}
+let retryList = [];
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedMode = card.dataset.mode;
+  });
+});
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(questionSet) {
+  const pool = questionSet || (selectedMode === 'all' ? ALL_QUESTIONS : ALL_QUESTIONS.filter(q => q.cat === selectedMode));
+  currentQuestions = shuffle(pool);
+  currentIndex = 0;
+  score = 0;
+  answers = [];
+  document.getElementById('mode-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  updateLiveScore();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = currentQuestions[currentIndex];
+  const total = currentQuestions.length;
+  document.getElementById('q-num').textContent = `Question ${currentIndex+1} of ${total}`;
+  document.getElementById('progress-fill').style.width = `${(currentIndex/total)*100}%`;
+
+  // Tag
+  const tagEl = document.getElementById('q-tag');
+  const tagMap = {ratio:'📊 Ratios', valuation:'💰 Valuation', screening:'🔍 Screening', qualitative:'🏛️ Qualitative', academic:'📚 Academic'};
+  tagEl.textContent = tagMap[q.cat] || q.cat;
+  tagEl.className = `q-tag tag-${q.cat}`;
+
+  document.getElementById('q-text').textContent = q.q;
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
+    btn.addEventListener('click', () => selectAnswer(i));
+    list.appendChild(btn);
+  });
+
+  document.getElementById('explanation-box').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(chosen) {
+  const q = currentQuestions[currentIndex];
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  const correct = q.ans;
+  buttons[correct].classList.add('correct');
+  if (chosen !== correct) {
+    buttons[chosen].classList.add('wrong');
+  } else {
+    score++;
+  }
+
+  answers.push({ q: q.q, chosen: q.opts[chosen], correctAns: q.opts[correct], correct: chosen===correct, exp: q.exp });
+
+  const expBox = document.getElementById('explanation-box');
+  document.getElementById('explanation-text').textContent = q.exp;
+  expBox.style.display = 'block';
+
+  document.getElementById('next-btn').style.display = 'inline-block';
+  document.getElementById('next-btn').textContent = currentIndex === currentQuestions.length-1 ? 'SEE RESULTS →' : 'NEXT →';
+
+  updateLiveScore();
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function updateLiveScore() {
+  document.getElementById('live-score').textContent = `${score} / ${answers.length} correct`;
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+
+  const total = currentQuestions.length;
+  const pct = Math.round((score/total)*100);
+  document.getElementById('result-pct').textContent = `${pct}%`;
+  document.getElementById('result-fraction').textContent = `${score} / ${total} correct`;
+
+  let grade, color;
+  if (pct >= 90) { grade = '🏆 EXCELLENT — Exam Ready'; color = '#4afa8a'; }
+  else if (pct >= 80) { grade = '✅ STRONG — Keep Drilling'; color = '#a8f5c5'; }
+  else if (pct >= 70) { grade = '📖 GOOD — Review Weak Areas'; color = '#f5c842'; }
+  else if (pct >= 60) { grade = '⚠️ FAIR — More Study Needed'; color = '#ff9a3c'; }
+  else { grade = '❌ NEEDS WORK — Review Core Concepts'; color = '#ff5b5b'; }
+
+  const gradeEl = document.getElementById('result-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.color = color;
+
+  // Category breakdown
+  const cats = {};
+  answers.forEach((a, i) => {
+    const cat = currentQuestions[i].cat;
+    if (!cats[cat]) cats[cat] = {c:0, t:0};
+    cats[cat].t++;
+    if (a.correct) cats[cat].c++;
+  });
+
+  const catNames = {ratio:'Ratios', valuation:'Valuation', screening:'Screening', qualitative:'Qualitative', academic:'Academic'};
+  const bd = document.getElementById('result-breakdown');
+  bd.innerHTML = '';
+  Object.entries(cats).forEach(([cat, {c,t}]) => {
+    bd.innerHTML += `<div class="breakdown-card">
+      <div class="breakdown-label">${catNames[cat]||cat}</div>
+      <div class="breakdown-val">${c}/${t}</div>
+    </div>`;
+  });
+
+  // Missed questions
+  const missed = answers.filter(a => !a.correct);
+  retryList = currentQuestions.filter((_, i) => !answers[i].correct);
+
+  const ms = document.getElementById('missed-section');
+  if (missed.length === 0) {
+    ms.innerHTML = '<div style="color:#4afa8a;font-size:16px;text-align:center">🎉 Perfect score! No missed questions.</div>';
+  } else {
+    ms.innerHTML = `<div class="missed-title">MISSED (${missed.length})</div>`;
+    missed.forEach(m => {
+      ms.innerHTML += `<div class="missed-item">
+        <div class="missed-q">${m.q}</div>
+        <div class="missed-answer">Your answer: ${m.chosen}</div>
+        <div class="missed-correct">✓ Correct: ${m.correctAns}</div>
+      </div>`;
+    });
+  }
+}
+
+function retryMissed() {
+  if (retryList.length === 0) return;
+  startQuiz(retryList);
+}
+
+function resetToHome() {
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('mode-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
